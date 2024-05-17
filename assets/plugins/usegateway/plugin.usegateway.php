@@ -5,9 +5,9 @@ $lang = $commerce->getUserLanguage('usegateway');
 
 switch ($modx->event->name) {
     case 'OnRegisterPayments': {
-        $class = new \Commerce\Payments\Nowpayments($modx, $params);
+        $class = new \Commerce\Payments\Usegateway($modx, $params);
         if (empty($params['title'])) {
-            $params['title'] = $lang['nowpayments.caption'];
+            $params['title'] = $lang['usegateway.caption'];
         }
 
         $commerce->registerPayment('usegateway', $params['title'], $class);
