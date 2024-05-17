@@ -36,6 +36,7 @@ class Usegateway extends Payment
             'metadata' => [
                 'order_id' => $order['id'],
                 'payment_id' => $payment['id'],
+                'payment_hash' => $payment['hash'],
             ],
             'cancel_url' => MODX_SITE_URL . 'commerce/usegateway/payment-failed',
             'redirect_url' => MODX_SITE_URL . 'commerce/usegateway/payment-success',
@@ -61,14 +62,14 @@ class Usegateway extends Payment
         $secret = $this->getSetting('secret_key');
         $headers = getallheaders();
         if ($this->debug) {
-            $this->modx->logEvent(0, 3, 'Callback start <pre>' . print_r($response, true) . '</pre><pre>' . print_r($response, true) . '</pre>', 'Commerce Usegateway Payment Callback');
+            $this->modx->logEvent(0, 3, 'Callback start <pre>' . print_r($response, true) . '</pre><pre>' . print_r($headers, true) . '</pre>', 'Commerce Usegateway Payment Callback');
         }
-        if(isset($headers['Svix-Id']) && isset($headers['Svix-Timestamp']) && isset($headers['Svix-Signature']) && isset($response['event']) && $response['event'] == 'payment.completed' && isset($response['metadata']['order_id']) && isset($response['metadata']['payment_id'])) {
+        if(isset($headers['Svix-Id']) && isset($headers['Svix-Timestamp']) && isset($headers['Svix-Signature']) && isset($response['event']) && $response['event'] == 'payment.completed' && isset($response['data']['metadata']['order_id']) && isset($response['data']['metadata']['payment_id'])) {
             $processor = $this->modx->commerce->loadProcessor();
             try {
-                $payment = $processor->loadPayment($response['metadata']['payment_id']);
+                $payment = $processor->loadPayment($response['data']['metadata']['payment_id']);
 
-                if (!$payment || $payment['order_id'] != $response['metadata']['order_id']) {
+                if (!$payment || $payment['order_id'] != $response['data']['metadata']['order_id'] || $payment['hash'] != $response['data']['metadata']['payment_hash']) {
                     throw new Exception('Payment "' . htmlentities(print_r($response['metadata']['payment_id'], true)) . '" . not found!');
                 }
 
