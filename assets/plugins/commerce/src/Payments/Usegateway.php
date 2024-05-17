@@ -15,8 +15,8 @@ class Usegateway extends Payment
 
     public function getMarkup()
     {
-        if (empty($this->getSetting('shop_id')) && empty($this->getSetting('secret_key'))) {
-            return '<span class="error" style="color: red;">' . $this->lang['usegateway.error.empty_client_credentials'] . '</span>';
+        if (empty($this->getSetting('secret_key'))) {
+            return '<span class="error" style="color: red;">' . $this->lang['usegateway.error_empty_params'] . '</span>';
         }
     }
 
@@ -100,7 +100,6 @@ class Usegateway extends Payment
             CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST  => 'POST',
             CURLOPT_POSTFIELDS     => $data,
-            CURLOPT_HEADER => true,
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json',
                 'Content-Type: application/json',
@@ -110,10 +109,11 @@ class Usegateway extends Payment
         $response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
         curl_close($curl);
-        if ($httpcode !== 201) {
+        $response = json_decode($response, true) ?? [];
+        if ($httpcode !== 201 || empty($response)) {
             throw new \Exception('Request failed with ' . $httpcode . ': <pre>' . print_r($data, true) . '</pre>', $httpcode);
         }
 
-        return json_decode($response, true) ?? [];
+        return $response;
     }
 }
