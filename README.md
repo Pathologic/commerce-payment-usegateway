@@ -1,2 +1,2 @@
 # commerce-payment-usegateway
-Usegateway payment plugin
+Webhook on payment.completed event shoud be enabled at the settings page. Webook url - https://sitename.com/commerce/usegateway/payment-process
